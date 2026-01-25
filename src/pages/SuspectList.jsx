@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import SearchBar from "../components/SearchBar";
 
 const SuspectList = () => {
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
 
   const suspects = [
     {
@@ -14,14 +17,14 @@ const SuspectList = () => {
     {
       id: 2,
       name: "Amit Sharma",
-      alias: "Pickpocket",
+      alias: "Pickpocket King",
       status: "High Risk",
       photo: "https://via.placeholder.com/80"
     },
     {
       id: 3,
       name: "Rohit Singh",
-      alias: "Burglar",
+      alias: "Night Burglar",
       status: "Under Surveillance",
       photo: "https://via.placeholder.com/80"
     },
@@ -35,11 +38,18 @@ const SuspectList = () => {
     {
       id: 5,
       name: "Suresh Nair",
-      alias: "Fraudster",
+      alias: "Digital Fraudster",
       status: "Released",
       photo: "https://via.placeholder.com/80"
     }
   ];
+
+  //  FILTER LOGIC
+  const filteredSuspects = suspects.filter(
+    (s) =>
+      s.name.toLowerCase().includes(query.toLowerCase()) ||
+      s.alias.toLowerCase().includes(query.toLowerCase())
+  );
 
   const statusStyle = (status) => {
     switch (status) {
@@ -62,15 +72,18 @@ const SuspectList = () => {
     <div
       style={{
         minHeight: "100vh",
-        background: "#f1f5f9",
+        background: "#23415e",
         padding: "40px"
       }}
     >
-      <h1 style={{ marginBottom: "25px", color: "#0f172a" }}>
-         SUSPECT DATABASE 
+      <h1 style={{ marginBottom: "20px", color: "#ffffff" , fontSize: "70px"}}>
+         Suspect Database
       </h1>
 
-      {suspects.map((s) => (
+      {/*  SEARCH BAR */}
+      <SearchBar query={query} setQuery={setQuery} />
+
+      {filteredSuspects.map((s) => (
         <div
           key={s.id}
           onClick={() => navigate(`/suspects/${s.id}`)}
@@ -83,11 +96,9 @@ const SuspectList = () => {
             marginBottom: "16px",
             borderRadius: "14px",
             cursor: "pointer",
-            boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
-            transition: "transform 0.15s ease"
+            boxShadow: "0 6px 16px rgba(0,0,0,0.08)"
           }}
         >
-          {/* PHOTO */}
           <img
             src={s.photo}
             alt={s.name}
@@ -95,22 +106,17 @@ const SuspectList = () => {
               width: "80px",
               height: "80px",
               borderRadius: "10px",
-              objectFit: "cover",
-              border: "2px solid #e5e7eb"
+              objectFit: "cover"
             }}
           />
 
-          {/* TEXT */}
           <div style={{ flex: 1 }}>
-            <h3 style={{ margin: "0 0 6px 0", color: "#020617" }}>
-              {s.name}
-            </h3>
-            <p style={{ margin: 0, color: "#475569" }}>
+            <h3 style={{ margin: "0 0 6px 0" }}>{s.name}</h3>
+            <p style={{ margin: 0, color: "#060d15" }}>
               Alias: {s.alias}
             </p>
           </div>
 
-          {/* STATUS */}
           <span
             style={{
               ...statusStyle(s.status),
