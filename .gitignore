@@ -1,0 +1,8 @@
+# frontend junk
+node_modules/
+.vite/
+
+# backend junk
+backend/venv/
+backend/__pycache__/
+*.pyc
