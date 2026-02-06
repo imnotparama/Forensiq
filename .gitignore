@@ -18,3 +18,16 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# Node
+node_modules/
+
+# Env
+.env
