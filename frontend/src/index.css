@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  /* Tactical Operative Theme */
+  --color-cyber: #3b82f6; /* Blue-500 */
+  --color-cyber-dim: rgba(59, 130, 246, 0.1);
+  --color-cyber-dark: #020617; /* Slate-950 */
+  --color-cyber-panel: #1e293b; /* Slate-800 */
+  --color-cyber-border: #334155; /* Slate-700 */
+  --color-cyber-accent: #f59e0b; /* Amber */
+  --color-cyber-success: #10b981; /* Emerald */
+  --color-cyber-warning: #f59e0b; /* Amber */
+  --color-cyber-danger: #ef4444; /* Red */
+  
+  --animate-spin-slow: spin 3s linear infinite;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-cyber-dark);
+    color: #f8fafc;
+    font-family: "Inter", sans-serif;
+    overflow: hidden;
+  }
+}
+
+@layer components {
+  /* Custom Scrollbar - Sleek Gray */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: #0f172a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #475569;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #64748b;
+  }
+
+  /* Tactical Panel */
+  .cyber-panel {
+    background-color: var(--color-cyber-panel);
+    border: 1px solid var(--color-cyber-border);
+    padding: 1.25rem;
+    border-radius: 0.375rem; /* Slightly more rigid */
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Corner Accents - Tactical Markers */
+  .cyber-panel::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-top: 2px solid var(--color-cyber);
+    border-left: 2px solid var(--color-cyber);
+  }
+  
+  .cyber-panel::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-bottom: 2px solid var(--color-cyber);
+    border-right: 2px solid var(--color-cyber);
+  }
+
+  /* Glitch Text turned into Status Text */
+  .glitch {
+    position: relative;
+    color: var(--color-cyber);
+    font-family: monospace;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+}

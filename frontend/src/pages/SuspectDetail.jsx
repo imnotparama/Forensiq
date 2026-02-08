@@ -1,213 +1,180 @@
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ArrowLeft, Cpu, Network, Shield } from "lucide-react";
+import SuspectNetwork from "../components/SuspectNetwork";
 
-const SuspectDetail = () => {
-    const { id } = useParams();
+export default function SuspectDetail() {
+  const { id } = useParams();
+  const [suspect, setSuspect] = useState(null);
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [networkData, setNetworkData] = useState(null);
 
-    // 🔹 Core states
-    const [suspect, setSuspect] = useState(null);
-    const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch(`http://localhost:8000/api/suspects/${id}`)
+      .then((res) => res.json())
+      .then((data) => setSuspect(data));
 
-    // 🤖 AI states
-    const [aiLoading, setAiLoading] = useState(false);
-    const [aiSummary, setAiSummary] = useState(null);
-    const [aiSource, setAiSource] = useState(null);
+    // Fetch network data
+    fetch(`http://localhost:8000/api/network/${id}`)
+      .then((res) => res.json())
+      .then((data) => setNetworkData(data));
+  }, [id]);
 
-    // 🔗 FETCH SINGLE SUSPECT
-    useEffect(() => {
-        fetch(`http://127.0.0.1:8000/api/suspects/${id}`)
-            .then((res) => res.json())
-            .then((data) => {
-                setSuspect({
-                    name: data.name,
-                    alias: data.alias || 'Unknown',
-                    status: data.risk_level,
-                    age: data.age || 'N/A',
-                    gender: data.gender || 'N/A',
-                    height: data.height || 'N/A',
-                    location: data.location || 'N/A',
-                    lastSeen: data.last_seen || 'N/A',
-                    photo: 'https://via.placeholder.com/420',
-                    crimes: data.crimes?.length ? data.crimes : ['No crime records available'],
-                });
-                setLoading(false);
-            })
-            .catch(() => setLoading(false));
-    }, [id]);
+  const runAnalysis = () => {
+    setAnalyzing(true);
+    fetch(`http://localhost:8000/api/analyze/suspect/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        // Simulate delay for "processing" effect
+        setTimeout(() => {
+          setAiAnalysis(data);
+          setAnalyzing(false);
+        }, 1500);
+      });
+  };
 
-    // 🤖 AI ANALYSIS
-    const generateAIReport = async () => {
-        setAiLoading(true);
-        setAiSummary(null);
+  // --- DEBUG PROBE ---
+  // Un-comment the line below to test if component mounts
+  // return <div className="p-20 text-4xl text-white font-bold bg-red-600 z-50 relative">DEBUG: COMPONENT MOUNTED. ID: {id}</div>;
 
-        try {
-            const res = await fetch(`http://127.0.0.1:8000/api/analyze/suspect/${id}`);
-            const data = await res.json();
+  if (!suspect) return <div className="p-8 text-cyber font-mono animate-pulse">ACCESSING ENCRYPTED FILE...</div>;
 
-            setAiSummary(data.summary);
-            setAiSource(data.source || 'gemini');
-        } catch (err) {
-            setAiSummary(
-                'AI analysis unavailable. Displaying fallback intelligence based on known crime patterns.'
-            );
-            setAiSource('fallback');
-        } finally {
-            setAiLoading(false);
-        }
-    };
+  return (
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2 text-cyber-blue hover:text-white transition-colors group">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> 
+          <span className="font-mono text-sm tracking-wider">BACK TO DATABASE</span>
+        </Link>
+        <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
+           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"/> 
+           SYSTEM ONLINE
+        </div>
+      </div>
 
-    if (loading) {
-        return <div style={{ padding: '40px', color: 'white' }}>Loading suspect details...</div>;
-    }
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Left Column: Profile & Analysis */}
+        <div className="space-y-6">
+            {/* Profile Card */}
+            <div className="cyber-panel relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 pointer-events-none" />
+                
+                <div className="relative z-10">
+                    <div className="aspect-square bg-gray-900/50 rounded-lg mb-4 flex items-center justify-center border border-gray-800/50 overflow-hidden">
+                        {suspect.image_url ? (
+                            <img src={suspect.image_url} alt={suspect.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                        ) : (
+                            <span className="text-gray-600 font-mono text-xs">NO IMAGE DATA</span>
+                        )}
+                    </div>
 
-    if (!suspect) {
-        return (
-            <div style={{ padding: '40px' }}>
-                <h2>Suspect Not Found</h2>
-            </div>
-        );
-    }
-
-    // 🎨 STATUS STYLE
-    const statusStyle = (status) => {
-        switch (status) {
-            case 'High':
-                return { background: '#ffedd5', color: '#9a3412' };
-            case 'Medium':
-                return { background: '#fef9c3', color: '#854d0e' };
-            case 'Low':
-                return { background: '#dcfce7', color: '#166534' };
-            default:
-                return { background: '#e5e7eb', color: '#374151' };
-        }
-    };
-
-    return (
-        <div style={{ minHeight: '100vh', background: '#23415e', padding: '40px' }}>
-            <div
-                style={{
-                    maxWidth: '1000px',
-                    margin: '0 auto',
-                    background: '#ffffff',
-                    borderRadius: '20px',
-                    padding: '30px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
-                }}
-            >
-                {/* TOP SECTION */}
-                <div style={{ display: 'flex', gap: '40px', marginBottom: '40px' }}>
-                    <img
-                        src={suspect.photo}
-                        alt={suspect.name}
-                        style={{
-                            width: '420px',
-                            height: '420px',
-                            objectFit: 'cover',
-                            borderRadius: '16px',
-                            border: '3px solid #e5e7eb',
-                        }}
-                    />
-
-                    <div>
-                        <h1 style={{ marginBottom: '8px', color: '#020617' }}>{suspect.name}</h1>
-
-                        <p style={{ fontSize: '18px', color: '#000000' }}>
-                            Alias: <strong>{suspect.alias}</strong>
-                        </p>
-
-                        <span
-                            style={{
-                                ...statusStyle(suspect.status),
-                                padding: '10px 18px',
-                                borderRadius: '999px',
-                                fontWeight: 'bold',
-                                display: 'inline-block',
-                                marginTop: '10px',
-                            }}
-                        >
-                            {suspect.status}
+                    <h1 className="text-2xl font-black text-white mb-1 uppercase tracking-tighter">{suspect.name}</h1>
+                    <div className="flex items-center gap-2 mb-6">
+                        <span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider rounded border ${
+                            suspect.status === 'WANTED' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 
+                            suspect.status === 'IN CUSTODY' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 
+                            'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                        }`}>
+                            {suspect.status || 'UNKNOWN'}
                         </span>
+                        <span className="text-gray-500 text-xs font-mono">{suspect.id_code || 'ID-UNKNOWN'}</span>
+                    </div>
 
-                        <div style={{ marginTop: '30px', color: '#000000' }}>
-                            <p>
-                                <strong>Age:</strong> {suspect.age}
-                            </p>
-                            <p>
-                                <strong>Gender:</strong> {suspect.gender}
-                            </p>
-                            <p>
-                                <strong>Height:</strong> {suspect.height}
-                            </p>
-                            <p>
-                                <strong>Location:</strong> {suspect.location}
-                            </p>
-                            <p>
-                                <strong>Last Seen:</strong> {suspect.lastSeen}
-                            </p>
-
-                            {/* AI BUTTON */}
-                            <button
-                                onClick={generateAIReport}
-                                disabled={aiLoading}
-                                style={{
-                                    marginTop: '20px',
-                                    padding: '10px 18px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    fontWeight: 'bold',
-                                    background: aiLoading
-                                        ? '#9ca3af'
-                                        : 'linear-gradient(90deg, #4f46e5, #9333ea)',
-                                    color: '#ffffff',
-                                }}
-                            >
-                                {aiLoading ? 'Analyzing with AI…' : 'Generate AI Intelligence'}
-                            </button>
+                    <div className="space-y-3 font-mono text-sm">
+                        <div className="flex justify-between border-b border-gray-800/50 pb-2">
+                            <span className="text-gray-500">KNOWN ALIAS</span>
+                            <span className="text-gray-300">{suspect.alias || 'None'}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-800/50 pb-2">
+                            <span className="text-gray-500">LAST SEEN</span>
+                            <span className="text-gray-300">{suspect.last_seen || 'Unknown'}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-800/50 pb-2">
+                            <span className="text-gray-500">THREAT LEVEL</span>
+                            <span className="text-red-400">{suspect.threat_level || 'LOW'}</span>
                         </div>
                     </div>
-                </div>
 
-                {/* CRIMES */}
-                <div
-                    style={{
-                        background: '#23415e',
-                        padding: '25px',
-                        borderRadius: '14px',
-                    }}
-                >
-                    <h2 style={{ color: '#ffffff' }}>Known Crimes</h2>
-                    <ul style={{ marginTop: '15px' }}>
-                        {suspect.crimes.map((crime, index) => (
-                            <li key={index} style={{ marginBottom: '10px', color: '#ffffff' }}>
-                                {crime}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* AI OUTPUT */}
-                {aiSummary && (
-                    <div
-                        style={{
-                            marginTop: '30px',
-                            background: '#111827',
-                            padding: '22px',
-                            borderRadius: '14px',
-                            color: '#e5e7eb',
-                        }}
+                    <button 
+                        onClick={runAnalysis}
+                        disabled={analyzing || aiAnalysis}
+                        className="w-full mt-6 py-3 bg-cyber-blue/10 text-cyber-blue border border-cyber-blue/30 hover:bg-cyber-blue/20 hover:border-cyber-blue/60 transition-all duration-300 flex items-center justify-center gap-3 font-mono text-xs tracking-wider group/btn"
                     >
-                        <h2 style={{ marginBottom: '12px' }}>AI Intelligence Report</h2>
-                        <p style={{ lineHeight: '1.7' }}>{aiSummary}</p>
-                        <p style={{ marginTop: '10px', fontSize: '13px', opacity: 0.7 }}>
-                            Generated using{' '}
-                            {aiSource === 'gemini' ? 'Gemini AI' : 'Fallback Engine'}
-                        </p>
+                        {analyzing ? (
+                            <Cpu className="w-4 h-4 animate-spin"/>
+                        ) : (
+                            <Cpu className="w-4 h-4 group-hover/btn:scale-110 transition-transform"/>
+                        )}
+                        {analyzing ? 'PROCESSING DATA...' : 'RUN AI ANALYSIS'}
+                    </button>
+                </div>
+            </div>
+
+            {/* AI Analysis Result */}
+            {aiAnalysis && (
+                <div className="cyber-panel p-5 border-l-2 border-l-cyber-blue animate-fade-in relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 opacity-10">
+                        <Cpu className="w-16 h-16 text-cyber-blue" />
                     </div>
-                )}
+                    
+                    <h3 className="text-sm font-bold text-cyber-blue mb-3 flex items-center gap-2 relative z-10">
+                        <div className="w-1.5 h-1.5 bg-cyber-blue rounded-full animate-pulse" />
+                        AI INSIGHT
+                    </h3>
+                    
+                    <div className="text-sm text-gray-300 leading-relaxed mb-4 font-mono relative z-10">
+                        {aiAnalysis.summary}
+                    </div>
+                    
+                    <button
+                        onClick={() => setAiAnalysis(null)}
+                        className="text-[10px] text-gray-500 hover:text-white underline uppercase tracking-wider relative z-10 transition-colors"
+                    >
+                        RESET ANALYSIS
+                    </button>
+                </div>
+            )}
+        </div>
+
+        {/* Existing Layout for Columns 2 & 3 (Visualization) */}
+        <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-2">
+                <h2 className="text-lg font-mono font-bold text-gray-400 flex items-center gap-2">
+                    <Network className="w-5 h-5" /> KNOWN ASSOCIATES
+                </h2>
+                <div className="cyber-panel p-0 overflow-hidden h-[400px]">
+                     {networkData ? (
+                        <SuspectNetwork nodes={networkData.nodes} edges={networkData.edges} />
+                     ) : (
+                        <div className="h-full flex items-center justify-center text-gray-500 font-mono text-sm animate-pulse">
+                            Establishing secure connection...
+                        </div>
+                     )}
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <h2 className="text-lg font-mono font-bold text-gray-400 flex items-center gap-2">
+                    <Shield className="w-5 h-5" /> CRIMINAL RECORD
+                </h2>
+                <div className="cyber-panel">
+                    <div className="space-y-2">
+                        {suspect.crimes && suspect.crimes.map((crime, i) => (
+                            <div key={i} className="flex items-center gap-3 p-3 bg-black/40 border border-gray-800/50 rounded hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-300 group">
+                                <div className="w-1.5 h-1.5 bg-red-500/50 group-hover:bg-red-500 rounded-full transition-colors" />
+                                <span className="font-mono text-sm text-gray-300 group-hover:text-white transition-colors uppercase tracking-tight">{crime}</span>
+                            </div>
+                        ))}
+                        {(!suspect.crimes || suspect.crimes.length === 0) && (
+                            <div className="text-sm text-gray-500 italic p-4 text-center font-mono">No criminal records found in database.</div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
-    );
-};
-
-export default SuspectDetail;
+      </div>
+    </div>
+  );
+}
