@@ -9,7 +9,7 @@ export default function LiveFeed() {
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/feed");
+        const res = await fetch("/api/feed");
         const data = await res.json();
         // Prepend new items to simulate a real feed, limiting to 10
         setItems(prev => {

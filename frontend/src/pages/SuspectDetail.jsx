@@ -11,19 +11,19 @@ export default function SuspectDetail() {
   const [networkData, setNetworkData] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/suspects/${id}`)
+    fetch(`/api/suspects/${id}`)
       .then((res) => res.json())
       .then((data) => setSuspect(data));
 
     // Fetch network data
-    fetch(`http://localhost:8000/api/network/${id}`)
+    fetch(`/api/network/${id}`)
       .then((res) => res.json())
       .then((data) => setNetworkData(data));
   }, [id]);
 
   const runAnalysis = () => {
     setAnalyzing(true);
-    fetch(`http://localhost:8000/api/analyze/suspect/${id}`)
+    fetch(`/api/analyze/suspect/${id}`)
       .then((res) => res.json())
       .then((data) => {
         // Simulate delay for "processing" effect

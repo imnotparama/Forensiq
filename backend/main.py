@@ -19,7 +19,7 @@ import os
 # Get the absolute path to the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # The database is in the parent directory of this script (crime-intel-system/)
-DB_PATH = os.path.join(BASE_DIR, "..", "crime_intel.db")
+DB_PATH = os.path.join(BASE_DIR, "crime_intel.db")
 
 # ---------------- HELPERS ----------------
 def get_db():

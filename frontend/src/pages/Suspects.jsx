@@ -8,7 +8,7 @@ export default function Suspects() {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        fetch("http://localhost:8000/api/suspects/")
+        fetch("/api/suspects/")
             .then(res => res.json())
             .then(data => {
                 console.log("Fetched suspects:", data);
